@@ -14,25 +14,11 @@ app.ws('/ws', (ws, req) => {
 
   ws.on('message', (message) => {
     console.log('Received:', message)
-    let data
-
-    try {
-      data = JSON.parse(message)
-    } catch (e) {
-      console.error('Invalid JSON:', message)
-      return
-    }
-
-    //タイプがチャットの時だけ反映
-    if (data.type === 'chat' && typeof data.text === 'string') {
-      data.text += '♡'//後ろに♡
-    }
-
-    const addmessage = JSON.stringify(data)
 
     connects.forEach((socket) => {
       if (socket.readyState === 1) {
-        socket.send(addmessage)
+        // Check if the connection is open
+        socket.send(message)
       }
     })
   })
