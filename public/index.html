@@ -36,6 +36,37 @@
             background: #eee;
             cursor: pointer;
         }
+
+        /* 横並び(オタニ追加) */
+        .box {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        /* [type="color"] ピッカーの見た目を変更(オタニ追加) */
+        input[type="color"] {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: inline-block;
+            margin-right: 18px;
+            border: 1px solid rgb(0, 0, 0);
+            border-radius: 50%;
+        }
+
+        input[type="color"]::-webkit-color-swatch,
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            border: none;
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        /* [type="text"] コード入力エリアの見た目を変更(オタニ追加) */
+        input[type="text"] {
+            border: 1px solid rgb(0, 0, 0);
+            padding: 5px;
+        }
     </style>
 </head>
 
@@ -58,6 +89,13 @@
 
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
+
+            //ColorPickerをcanvasに反映させる(オタニ追加)
+            const colorPicker = document.querySelector('input[type="color"]');
+            ctx.strokeStyle = colorPicker.value; // 初期色の設定
+            colorPicker.addEventListener('input', () => {
+                ctx.strokeStyle = colorPicker.value;
+            });
 
             let drawing = false
 
