@@ -20,6 +20,20 @@
             margin: 0;
         }
 
+        /* 自分のメッセージは右寄せ(カワグチ) */
+        .my-message {
+            align-self: flex-end;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        /* 自分以外のメッセージは左寄せ(カワグチ) */
+        .other-message {
+            align-self: flex-start;
+            margin-right: auto;
+            text-align: left;
+        }
+
         .form {
             display: flex;
         }
@@ -78,19 +92,80 @@
             <button class="submit">Send</button>
         </form>
     </div>
+
+    <div style="margin-top: 20px;">
+        <!-- ラウンド数選択(プルダウン方式)(カワグチ) -->
+        <label>
+            ラウンド数:
+            <select id="roundSelect">
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+            </select>
+        </label>
+        <!-- ターン数選択(プルダウン方式)(カワグチ) -->
+        <label style="margin-left: 20px;">
+            ターン数:
+            <select id="turnSelect">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+            </select>
+        </label>
+        <!-- ゲーム開始ボタン(カワグチ) -->
+        <button id="startButton" style="margin-left: 20px;">ゲーム開始</button>
+
+    </div>
     <canvas id="canvas" width="600" height="600" style="border: solid 1px black"></canvas>
     <label>
-    線の太さ:
-    <input type="range" id="lineWidthSlider" min="1" max="20" value="5">
-  </label>
+        線の太さ:
+        <input type="range" id="lineWidthSlider" min="1" max="20" value="5">
+    </label>
     <input type="color" value="#000000">
 
     <script>
         function main() {
-            const myId = prompt("ユーザー名を入力してください")?.trim() || "名無し";
+            // myIdを自分で入力するように変更(入力なしならランダム)(カワグチ)
+            const myId = prompt("ユーザー名を入力してください")?.trim() || self.crypto.randomUUID().substr(0, 8);
             const host = location.origin.replace(/^http/, 'ws')
             const ws = new WebSocket(host + '/ws')
-            //const myId = self.crypto.randomUUID().substr(0, 8)
+
+            //入室しているユーザー管理(重複を許さない)(カワグチ)
+            let players = new Set()
+
+            //ボタンとチャットしている場所の管理(カワグチ)
+            const startButton = document.getElementById('startButton')
+            const chatArea = document.querySelector('.chat')
+
+            // 現在の入室人数を表示をする関数(カワグチ)
+            function updatePlayerCountDisplay() {
+                let countSpan = document.getElementById('playerCountSpan')
+
+                if (!countSpan) {
+                    countSpan = document.createElement('span')
+                    countSpan.id = 'playerCountSpan'
+                    countSpan.style.marginLeft = '10px'
+                    startButton.parentNode.insertBefore(countSpan, startButton.nextSibling)
+                }
+                countSpan.textContent = `入室人数: ${players.size} 人`
+            }
+
+            // ゲーム開始ボタンが押されたら(カワグチ)
+            startButton.onclick = () => {
+                const round = document.getElementById('roundSelect').value
+                const turn = document.getElementById('turnSelect').value
+                const playerCount = players.size
+
+                const confirmed = confirm(
+                    `入室人数: ${playerCount}人\nラウンド数: ${round}ラウンド\nターン数: ${turn}ターン\n\nゲームを開始しますか？`
+                )
+
+                if (confirmed) {
+                    ws.send(JSON.stringify({ type: 'start' }))
+                }
+            }
 
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
@@ -152,6 +227,11 @@
                 ws.send(message)
             }
 
+            // 接続時に参加したことえお知らせる(カワグチ)
+            ws.onopen = () => {
+                ws.send(JSON.stringify({ type: 'join', id: myId }))
+            };
+
             ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data)
                 if (msg.type === 'paint') {
@@ -167,16 +247,54 @@
                         mouseout()
                     }
                 }
-                if (msg.type === 'chat') {
-                    const { id, text } = msg
+
+                //プレイヤー情報が送られてきたら(カワグチ)
+                if (msg.type === 'players') {
+                    players = new Set(msg.players)
+                    //入室人数の更新
+                    updatePlayerCountDisplay()
+                }
+
+                //スタートボタンが押されたら(カワグチ)
+                if (msg.type === 'start') {
+                    //画面切り替え(チャット画面、ターン・ラウンド選択ボタンを消す)
+                    chatArea.style.display = 'none'
+                    canvas.style.display = 'block'
+
+                    document.getElementById('roundSelect').parentElement.style.display = 'none'
+                    document.getElementById('turnSelect').parentElement.style.display = 'none'
+                    document.getElementById('startButton').style.display = 'none'
+                }
+
+                //メッセージ送ったときの挙動の関数(カワグチ)
+                function appendMessage(id, text, myId) {
                     const messageList = document.querySelector('.messages')
                     const li = document.createElement('li')
+                    li.textContent = id + ': ' + text
                     if (id === myId) {
-                        li.textContent = `(${id})自分:` + text
+                        li.className = 'my-message'
                     } else {
-                        li.textContent = id + ': ' + text
+                        li.className = 'other-message'
                     }
                     messageList.appendChild(li)
+                }
+
+                if (msg.type === 'chat') {
+                    const { id, text } = msg
+                    //appendMessage関数でまとめた(カワグチ)
+                    appendMessage(msg.id, msg.text, myId)
+                }
+
+                //入室したら(カワグチ)
+                if (msg.type === 'join') {
+                    // 入室したユーザーをセットに追加
+                    players.add(msg.id)
+                    //入室人数の更新
+                    updatePlayerCountDisplay()
+                    const messageList = document.querySelector('.messages');
+                    const li = document.createElement('li');
+                    li.textContent = msg.id + 'が入室しました '
+                    messageList.appendChild(li);
                 }
             }
 
