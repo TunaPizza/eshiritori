@@ -42,7 +42,6 @@ app.ws('/ws', (ws, req) => {
           socket.send(joinMsg)
         }
       })
-
       return
     }
 
@@ -50,7 +49,7 @@ app.ws('/ws', (ws, req) => {
       // 全接続にゲーム開始通知を送る
       connects.forEach((socket) => {
         if (socket.readyState === 1) {
-          socket.send(JSON.stringify({ type: 'start' }));
+          socket.send(JSON.stringify({ type: 'start' }))
         }
       });
       return;
