@@ -10,6 +10,11 @@ let connects = []
 let players = new Set()
 let chatHistory = [];
 
+// グローバルでターン制御を保持(カワグチ)
+let turnOrder = [];
+let currentTurnIndex = 0;
+let round = 1;
+
 app.use(express.static('public'))
 
 app.ws('/ws', (ws, req) => {
@@ -54,25 +59,39 @@ app.ws('/ws', (ws, req) => {
     }
 
     if (msg.type === 'start') {
-      // ひらがな1文字をランダムに選ぶ
+      // ひらがな1文字をランダムに選ぶ(カワグチ)
       const firstChar = getRandomHiragana();
       const shuffledPlayers = Array.from(players).sort(() => Math.random() - 0.5);
+      currentTurnIndex = 0;
+
+      const startMsg = JSON.stringify({
+        type: 'start',
+        firstChar: firstChar,
+        turnOrder: turnOrder
+      });
 
       // 全接続にゲーム開始通知を送る(カワグチ)
       connects.forEach((socket) => {
         if (socket.readyState === 1) {
-          socket.send(JSON.stringify({ type: 'start', firstChar: firstChar, turnOrder: shuffledPlayers, }))
+          socket.send(startMsg);
         }
       });
+      notifyNextTurn();
       return;
     }
 
-    //ひらがな　一文字を選ぶ関数(カワグチ)
-    function getRandomHiragana() {
-      const hira = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん';
-      return hira[Math.floor(Math.random() * hira.length)];
-    }
+    // ターン終了を受け取る(カワグチ)
+    if (msg.type === 'end_turn') {
+      currentTurnIndex++;
 
+      if (currentTurnIndex >= turnOrder.length) {
+        currentTurnIndex = 0;
+        round++
+      }
+
+      notifyNextTurn();
+      return;
+    }
 
     connects.forEach((socket) => {
       if (socket.readyState === 1) {
@@ -86,6 +105,27 @@ app.ws('/ws', (ws, req) => {
     connects = connects.filter((conn) => conn !== ws)
   })
 })
+
+// 次のプレイヤーに通知(カワグチ)
+function notifyNextTurn() {
+  const currentPlayer = turnOrder[currentTurnIndex]
+  const turnMsg = JSON.stringify({
+    type: 'next_turn',
+    currentTurn: currentPlayer,
+    turnOrder: turnOrder,
+    round: round
+  })
+
+  connects.forEach((socket) => {
+    if (socket.readyState === 1) socket.send(turnMsg)
+  })
+}
+
+//ひらがな　一文字を選ぶ関数(カワグチ)
+function getRandomHiragana() {
+  const hira = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん';
+  return hira[Math.floor(Math.random() * hira.length)];
+}
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`)
