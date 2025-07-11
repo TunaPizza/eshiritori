@@ -60,7 +60,7 @@
             margin-top: 20px;
         }
 
-        /* [type="color"] ピッカーの見た目を変更(オタニ追加) */
+        /* ピッカーの見た目を変更(オタニ追加) */
         input[type="color"] {
             width: 32px;
             height: 32px;
@@ -180,31 +180,39 @@
             const ctx = canvas.getContext('2d')
 
             //ColorPickerの色をcanvasに反映させる(オタニ追加)
-            const colorPicker = document.querySelector('input[type="color"]');
-            //文字の太さを反映させる(オタニ追加)
+            const colorPicker = document.getElementById('colorPicker');
             const lineWidthSlider = document.getElementById('lineWidthSlider');
-            ctx.strokeStyle = colorPicker.value; // 初期色の設定
-            ctx.lineWidth = lineWidthSlider.value; // 線の太さを 5px にする
-            colorPicker.addEventListener('input', () => {
-                ctx.strokeStyle = colorPicker.value;
-            });
+            const eraserToggle = document.getElementById('eraserToggle');
 
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineWidth = lineWidthSlider.value;
+
+            colorPicker.addEventListener('input', () => {
+                if (!eraserMode) {
+                    ctx.strokeStyle = colorPicker.value;
+                }
+            });
             lineWidthSlider.addEventListener('input', () => {
                 ctx.lineWidth = lineWidthSlider.value;
             });
 
-            let drawing = false
+            let drawing = false;
+            let eraserMode = false;
+
+            //トグル(オタニ追加)
+            eraserToggle.addEventListener('click', () => {
+                eraserMode = !eraserMode;
+                eraserToggle.textContent = eraserMode ? "消しゴム ON" : "消しゴム OFF";
+                if (eraserMode) {
+                    ctx.strokeStyle = "#ffffff";
+                } else {
+                    ctx.strokeStyle = colorPicker.value;
+                }
+            });
 
             canvas.addEventListener('mousedown', (e) => {
-                sendDrawingEvent(e.offsetX, e.offsetY, 'mousedown')
-            })
-            function mousedown() {
-                drawing = true
-                ctx.beginPath()
-                //色を変えるのか太さを変えるのか(オタニ追加)
-                if (color) ctx.strokeStyle = color;
-                if (width) ctx.lineWidth = width;
-            }
+                sendDrawingEvent(e.offsetX, e.offsetY, 'mousedown');
+            });
 
             canvas.addEventListener('mousemove', (e) => {
                 if (drawing) {
