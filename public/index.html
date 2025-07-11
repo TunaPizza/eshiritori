@@ -87,6 +87,47 @@
     #eraserToggle {
       margin-left: 10px;
     }
+
+    /* 線の太さやカラーピッカーの場所を一律管理(オガワ) */
+    .drawing-tools {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      gap: 15px;
+      /* 要素間のスペース */
+      flex-wrap: wrap;
+      /* 要素が収まらない場合に折り返す */
+      justify-content: center;
+      /* ツールを中央寄せ */
+    }
+
+    /* 2つのキャンバスを横並びにするコンテナ(オガワ) */
+    .canvases-container {
+      display: flex;
+      gap: 20px;
+      /* キャンバス間のスペース */
+      margin: 20px auto;
+      /* 上下の余白と左右中央寄せ */
+      justify-content: center;
+      /* キャンバスを中央寄せ */
+      align-items: flex-start;
+      /* 上端を揃える */
+    }
+
+    .canvases-container canvas {
+      display: block;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #receivedCanvas {
+      border: solid 1px red;
+      /* 受信用キャンバスの枠線 */
+    }
+
+    #canvas {
+      border: solid 1px black;
+      /* 描画用キャンバスの枠線 */
+    }
   </style>
 </head>
 
@@ -122,21 +163,29 @@
     </label>
     <!-- ゲーム開始ボタン(カワグチ) -->
     <button id="startButton" style="margin-left: 20px;">ゲーム開始</button>
+  </div>
+
+  <!-- ふたつのキャンバス -->
+  <div class="canvases-container">
+    <canvas id="receivedCanvas" width="600" height="600"></canvas>
+    <canvas id="canvas" width="600" height="600"></canvas>
+  </div>
+
+  <div class="drawing-tools">
+    <!-- 線の太さ(オタニ追加) -->
+    <label>
+      線の太さ:
+      <input type="range" id="lineWidthSlider" min="1" max="20" value="5">
+    </label>
+    <!-- カラーピッカー(オタニ追加) -->
+    <input type="color" id="colorPicker" value="#000000">
+    <!-- 消しゴム(オタニ追加) -->
+    <button id="eraserToggle">消しゴム OFF</button>
+
+    <!-- sendPictureボタン追加(オガワ) -->
+    <button id="sendPictureButton">Send Picture</button>
 
   </div>
-  <canvas id="canvas" width="600" height="600" style="border: solid 1px black"></canvas>
-  <!-- 線の太さ(オタニ追加) -->
-  <label>
-    線の太さ:
-    <input type="range" id="lineWidthSlider" min="1" max="20" value="5">
-  </label>
-  <!-- カラーピッカー(オタニ追加) -->
-  <input type="color" id="colorPicker" value="#000000">
-  <!-- 消しゴム(オタニ追加) -->
-  <button id="eraserToggle">消しゴム OFF</button>
-
-  <!-- sendPictureボタン追加(オガワ) -->
-  <button id="sendPictureButton">Send Picture</button>
 
   <script>
     function main() {
@@ -165,6 +214,7 @@
       const chatInput = document.getElementById('chatInput'); // chatInputのIDを追加
       const chatSubmitButton = document.getElementById('chatSubmitButton'); // chatSubmitButtonのIDを追加
       const sendPictureButton = document.getElementById('sendPictureButton'); // 新しいボタンを取得
+      const drawingToolsContainer = document.querySelector('.drawing-tools');
 
       //描画モードか、回答入力モードか(オガワ)
       let isDrawingTurn = false; //絵を描くターンかどうか
@@ -202,6 +252,9 @@
         }
       }
 
+      //2つのキャンバスとコンテキストを取得(オガワ)
+      const receivedCanvas = document.getElementById('receivedCanvas');
+      const receivedCtx = receivedCanvas.getContext('2d');
       const canvas = document.getElementById('canvas')
       const ctx = canvas.getContext('2d')
 
@@ -284,13 +337,17 @@
         canvas.style.pointerEvents = 'auto'; // 描画可能に
         colorPicker.disabled = false;
         lineWidthSlider.disabled = false;
+        eraserToggle.disabled = false; // 消しゴムも有効に
+        drawingToolsContainer.style.display = 'flex'; // 描画ツール全体を表示
       }
 
       function disableDrawingTools() {
         canvas.style.pointerEvents = 'none'; // 描画できないように
         colorPicker.disabled = true;
         lineWidthSlider.disabled = true;
+        eraserToggle.disabled = true; // 消しゴムも無効に
         drawing = false; // 描画中フラグをオフにする
+        drawingToolsContainer.style.display = 'none'; // 描画ツール全体を非表示
       }
 
       //送信するメッセージに color, width, eraser を追加(オタニ追加)
@@ -315,8 +372,10 @@
 
         chatForm.style.display = 'none';
         sendPictureButton.style.display = 'block'
-        chatInput.placaholder = "絵を描いて「Send Picture」を押してください"
+        chatInput.placeholder = "絵を描いて「Send Picture」を押してください"
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
+
       }
 
       function setAnsweringTurnUI() {
@@ -340,6 +399,10 @@
         chatInput.placeholder = "チャットメッセージを入力";
         chatInput.value = '';
         chatInput.focus();
+
+        // 初期化時にキャンバスをクリア
+        ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
       }
 
       // 接続時に参加したことえお知らせる(カワグチ)
@@ -371,8 +434,8 @@
         if (msg.type === 'image_sended') {
           const img = new Image();
           img.onload = function () {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
+            receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
+            receivedCtx.drawImage(img, 0, 0);
           };
           img.src = msg.imageData;
         }
@@ -424,7 +487,8 @@
         if (msg.type === 'answer') {
           const { id, text } = msg;
           answers.push({ id, text });
-          console.log("保存された回答:", submittedAnswers); // デバッグ用
+          console.log("保存された回答:", answers); // デバッグ用
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         //入室したら(カワグチ)
@@ -475,6 +539,10 @@
           currentDrawingData = canvas.toDataURL('image/png');
           drawnImages.push(currentDrawingData);
           console.log("保存された画像:" + drawnImages)
+
+          // 描かれた画像をサーバーに送信
+          ws.send(JSON.stringify({ type: 'image_sended', imageData: currentDrawingData }));
+
           setAnsweringTurnUI();
         }
       }
