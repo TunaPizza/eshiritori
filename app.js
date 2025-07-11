@@ -23,7 +23,7 @@ app.ws('/ws', (ws, req) => {
     if (msg.type === 'join') {
       players.add(msg.id)
 
-      // 全クライアントに現在の参加者リストを送信
+      // 全クライアントに現在の参加者リストを送信(カワグチ)
       const playersMsg = JSON.stringify({
         type: 'players',
         players: Array.from(players),
@@ -35,7 +35,7 @@ app.ws('/ws', (ws, req) => {
         }
       })
 
-      // 他のクライアントに入室通知も送る
+      // 他のクライアントに入室通知も送る(カワグチ)
       const joinMsg = JSON.stringify({ type: 'join', id: msg.id })
       connects.forEach((socket) => {
         if (socket.readyState === 1) {
@@ -46,7 +46,7 @@ app.ws('/ws', (ws, req) => {
     }
 
     if (msg.type === 'start') {
-      // 全接続にゲーム開始通知を送る
+      // 全接続にゲーム開始通知を送る(カワグチ)
       connects.forEach((socket) => {
         if (socket.readyState === 1) {
           socket.send(JSON.stringify({ type: 'start' }))
