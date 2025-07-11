@@ -194,7 +194,7 @@
     </div>
 
     <!-- 待機画面(仮)(カワグチ) -->
-    <div id="waitingScreen" style="display: none;
+    <!-- <div id="waitingScreen" style="display: none;
         width: 600px;
         height: 600px;
         background-color: white;
@@ -204,7 +204,7 @@
         justify-content: center;
         font-size: 32px;
         font-weight: bold;">待機中...
-    </div>
+    </div> -->
 
     <script>
         function main() {
@@ -245,25 +245,25 @@
             let isAnsweringTurn = false; //回答入力ターンかどうか
 
             // 入室人数表示を更新する関数(カワグチ)
-            function updatePlayerCountDisplay() {
-                const playerCountElement = document.getElementById('playerCount');
-                if (playerCountElement) {
-                    playerCountElement.textContent = players.size;
-                }
-            }
+            // function updatePlayerCountDisplay() {
+            //     const playerCountElement = document.getElementById('playerCount');
+            //     if (playerCountElement) {
+            //         playerCountElement.textContent = players.size;
+            //     }
+            // }
 
             //ターン管理する関数(カワグチ)
-            function updateTurnDisplay() {
-                const display = turnOrder.map((name, index) => {
-                    if (index === currentTurnIndex) {
-                        return `<span style="color: red;">${name}</span>`;
-                    }
-                    return name;
-                }).join(" → ");
-                document.getElementById('turnDisplay').innerHTML = "ターン順: " + display;
+            // function updateTurnDisplay() {
+            //     const display = turnOrder.map((name, index) => {
+            //         if (index === currentTurnIndex) {
+            //             return `<span style="color: red;">${name}</span>`;
+            //         }
+            //         return name;
+            //     }).join(" → ");
+            //     document.getElementById('turnDisplay').innerHTML = "ターン順: " + display;
 
-                showCanvasIfMyTurn();
-            }
+            //     showCanvasIfMyTurn();
+            // }
 
 
             // ゲーム開始ボタンが押されたら(カワグチ)
