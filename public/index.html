@@ -130,6 +130,7 @@
     線の太さ:
     <input type="range" id="lineWidthSlider" min="1" max="20" value="5">
   </label>
+  <!-- カラーピッカー(オタニ追加) -->
   <input type="color" id="colorPicker" value="#000000">
   <!-- 消しゴム(オタニ追加) -->
   <button id="eraserToggle">消しゴム OFF</button>
@@ -374,19 +375,23 @@
       //↑の処理をチャットを区別したものに変更(オガワ)
       chatForm.onsubmit = function (e) {
         e.preventDefault()
-        const text = chatInput.value.trim();
-
-        if (text === '') return; // 空のメッセージは送信しない
+        const input = document.querySelector('.input')
+        const text = input.value
 
         if (gameStarted) {
           // ゲーム中なら回答として送信
-          ws.send(JSON.stringify({ id: myId, text: text, type: 'answer' }));
+          // 回答が入力されていれば、回答も送信・保存
+          if (text !== '') {
+            ws.send(JSON.stringify({ id: myId, text: text, type: 'answer' }));
+          }
         } else {
           // ゲーム開始前ならチャットとして送信
-          ws.send(JSON.stringify({ id: myId, text: text, type: 'chat' }));
+          if (text !== '') { // 空のメッセージは送信しない
+            ws.send(JSON.stringify({ id: myId, text: text, type: 'chat' }));
+          }
         }
-        chatInput.value = ''
-        chatInput.focus()
+        input.value = ''
+        input.focus()
       }
 
       ws.onerror = function (error) {
