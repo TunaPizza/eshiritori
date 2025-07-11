@@ -545,6 +545,20 @@
                     li.textContent = msg.id + 'が入室しました '
                     messageList.appendChild(li);
                 }
+
+                //次のターンだったら(カワグチ)
+                if (msg.type === 'next_turn') {
+                    currentTurnIndex = turnOrder.indexOf(msg.currentTurn);
+                    updateTurnDisplay();
+
+                    if (msg.currentTurn === myId) {
+                        setDrawingTurnUI();
+                    } else {
+                        document.getElementById('waitingScreen').style.display = 'flex';
+                        canvas.style.display = 'none';
+                    }
+                }
+
             }
 
             const chatForm = document.querySelector('.form')
