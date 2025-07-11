@@ -216,11 +216,6 @@
             //入室しているユーザー管理(重複を許さない)(カワグチ)
             let players = new Set()
 
-            // 全体の順番(カワグチ)
-            let turnOrder = [];
-            // 現在のターン(カワグチ)
-            let currentTurnIndex = 0;
-
             //ゲーム開始状態を管理(オガワ)
             let gameStarted = false;
             //回答を保存する配列(オガワ)
@@ -244,27 +239,18 @@
             let isDrawingTurn = false; //絵を描くターンかどうか
             let isAnsweringTurn = false; //回答入力ターンかどうか
 
-            // 入室人数表示を更新する関数(カワグチ)
-            // function updatePlayerCountDisplay() {
-            //     const playerCountElement = document.getElementById('playerCount');
-            //     if (playerCountElement) {
-            //         playerCountElement.textContent = players.size;
-            //     }
-            // }
+            // 現在の入室人数を表示をする関数(カワグチ)
+            function updatePlayerCountDisplay() {
+                let countSpan = document.getElementById('playerCountSpan')
 
-            //ターン管理する関数(カワグチ)
-            // function updateTurnDisplay() {
-            //     const display = turnOrder.map((name, index) => {
-            //         if (index === currentTurnIndex) {
-            //             return `<span style="color: red;">${name}</span>`;
-            //         }
-            //         return name;
-            //     }).join(" → ");
-            //     document.getElementById('turnDisplay').innerHTML = "ターン順: " + display;
-
-            //     showCanvasIfMyTurn();
-            // }
-
+                if (!countSpan) {
+                    countSpan = document.createElement('span')
+                    countSpan.id = 'playerCountSpan'
+                    countSpan.style.marginLeft = '10px'
+                    startButton.parentNode.insertBefore(countSpan, startButton.nextSibling)
+                }
+                countSpan.textContent = `入室人数: ${players.size} 人`
+            }
 
             // ゲーム開始ボタンが押されたら(カワグチ)
             startButton.onclick = () => {
@@ -485,31 +471,19 @@
                 //スタートボタンが押されたら(カワグチ)
                 if (msg.type === 'start') {
                     //画面切り替え(チャット画面、ターン・ラウンド選択ボタンを消す)(カワグチ)
-                    chatArea.style.display = 'none';
-                    document.getElementById('roundSelect').parentElement.style.display = 'none';
-                    document.getElementById('turnSelect').parentElement.style.display = 'none';
-                    document.getElementById('startButton').style.display = 'none';
+                    chatArea.style.display = 'block'
+                    canvas.style.display = 'block'
+                    chatInput.style.display = 'block'
 
-                    //最初の文字、順番決まったら
-                    if (msg.firstChar && msg.turnOrder) {
-                        const firstCharEl = document.getElementById('firstChar');
-                        firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
-                        firstCharEl.style.display = 'inline';
-
-                        turnOrder = msg.turnOrder;
-                        currentTurnIndex = 0;
-                        updateTurnDisplay();
-
-                        alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
-                    }
+                    document.getElementById('roundSelect').parentElement.style.display = 'none'
+                    document.getElementById('turnSelect').parentElement.style.display = 'none'
+                    document.getElementById('startButton').style.display = 'none'
 
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
                     setDrawingTurnUI();
-
-
                 }
 
-                //メッセージ送ったときのテンプレート関数(カワグチ)
+                //メッセージ送ったときの挙動の関数(カワグチ)
                 function appendMessage(id, text, myId) {
                     const messageList = document.querySelector('.messages')
                     const li = document.createElement('li')
@@ -547,20 +521,6 @@
                     li.textContent = msg.id + 'が入室しました '
                     messageList.appendChild(li);
                 }
-
-                //次のターンだったら(カワグチ)
-                // if (msg.type === 'next_turn') {
-                //     currentTurnIndex = turnOrder.indexOf(msg.currentTurn);
-                //     updateTurnDisplay();
-
-                //     if (msg.currentTurn === myId) {
-                //         setDrawingTurnUI();
-                //     } else {
-                //         document.getElementById('waitingScreen').style.display = 'flex';
-                //         canvas.style.display = 'none';
-                //     }
-                // }
-
             }
 
             const chatForm = document.querySelector('.form')
