@@ -490,9 +490,6 @@
                     document.getElementById('turnSelect').parentElement.style.display = 'none';
                     document.getElementById('startButton').style.display = 'none';
 
-                    gameStarted = true; //ゲーム開始状態にする(オガワ)
-                    setDrawingTurnUI();
-
                     //最初の文字、順番決まったら
                     if (msg.firstChar && msg.turnOrder) {
                         const firstCharEl = document.getElementById('firstChar');
@@ -505,6 +502,11 @@
 
                         alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
                     }
+
+                    gameStarted = true; //ゲーム開始状態にする(オガワ)
+                    setDrawingTurnUI();
+
+
                 }
 
                 //メッセージ送ったときのテンプレート関数(カワグチ)
@@ -547,17 +549,17 @@
                 }
 
                 //次のターンだったら(カワグチ)
-                if (msg.type === 'next_turn') {
-                    currentTurnIndex = turnOrder.indexOf(msg.currentTurn);
-                    updateTurnDisplay();
+                // if (msg.type === 'next_turn') {
+                //     currentTurnIndex = turnOrder.indexOf(msg.currentTurn);
+                //     updateTurnDisplay();
 
-                    if (msg.currentTurn === myId) {
-                        setDrawingTurnUI();
-                    } else {
-                        document.getElementById('waitingScreen').style.display = 'flex';
-                        canvas.style.display = 'none';
-                    }
-                }
+                //     if (msg.currentTurn === myId) {
+                //         setDrawingTurnUI();
+                //     } else {
+                //         document.getElementById('waitingScreen').style.display = 'flex';
+                //         canvas.style.display = 'none';
+                //     }
+                // }
 
             }
 
