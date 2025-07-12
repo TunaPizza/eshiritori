@@ -187,6 +187,9 @@
         <input type="color" id="colorPicker" value="#000000">
         <!-- 消しゴム(オタニ追加) -->
         <button id="eraserToggle">消しゴム OFF</button>
+        <!-- Undo/Redo(オタニ追加) -->
+        <button id="undoBtn">↩</button>
+        <button id="redoBtn">↪</button>
 
         <!-- sendPictureボタン追加(オガワ) -->
         <button id="sendPictureButton">Send Picture</button>
@@ -224,6 +227,9 @@
             let drawnImages = [];
             //一時的に描かれた画像を保持する(オガワ)
             let currentDrawingData = null;
+
+            //書いた情報を保管する(オタニ追加)
+            let currentRemoteStroke = [];
 
             //ボタンとチャットしている場所の管理(カワグチ)
             const startButton = document.getElementById('startButton')
@@ -271,6 +277,10 @@
                 }
             }
 
+            //過去に書いたものを入れる配列(オタニ追加)
+            let drawingHistory = [];
+            let undoneHistory = [];
+
             //2つのキャンバスとコンテキストを取得(オガワ)
             const receivedCanvas = document.getElementById('receivedCanvas');
             const receivedCtx = receivedCanvas.getContext('2d');
@@ -308,6 +318,23 @@
                 }
             });
 
+            //redo/undoボタン追加(オタニ追加)
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+
+            //undoボタンクリックでWebSocketに送信(オタニ追加)
+            undoBtn.addEventListener('click', () => {
+                ws.send(JSON.stringify({ type: 'undo' }));
+            });
+
+            //redoボタンクリックでWebSocketに送信(オタニ追加)
+            redoBtn.addEventListener('click', () => {
+                ws.send(JSON.stringify({ type: 'redo' }));
+            });
+
+            //現在描画している線の座標を一時的に保存するための配列(オタニ追加)
+            let currentStroke = [];
+
             canvas.addEventListener('mousedown', (e) => {
                 sendDrawingEvent(e.offsetX, e.offsetY, 'mousedown');
             });
@@ -330,9 +357,20 @@
             canvas.addEventListener('mouseup', (e) => {
                 sendDrawingEvent(e.offsetX, e.offsetY, 'mouseup')
             })
+            //mouseup時にcurrentStrokeを初期化(オタニ追加)
             function mouseup() {
                 drawing = false
                 ctx.beginPath()
+                if (currentStroke.length > 0) {
+                    // 現在のストロークを保存
+                    drawingHistory.push({
+                        stroke: currentStroke,
+                        color: ctx.strokeStyle,
+                        width: ctx.lineWidth
+                    });
+                    currentStroke = []; // 次のストロークに備えてリセット
+                    undoneHistory = []; // 新しい描画があったのでredo履歴をクリア
+                }
             }
 
             canvas.addEventListener('mouseout', (e) => {
@@ -342,12 +380,35 @@
                 drawing = false
             }
 
+            //draw関数をundo/redoのために変更(オタニ追加)
             function draw(x, y, dragging) {
                 if (dragging) {
-                    ctx.lineTo(x, y)
-                    ctx.stroke()
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    currentStroke.push({ x, y });
                 } else {
-                    ctx.moveTo(x, y)
+                    ctx.moveTo(x, y);
+                    currentStroke.push({ x, y });
+                }
+            }
+
+            //canvasを再描画する際に必要(オタニ追加)
+            function redraw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let item of drawingHistory) {
+                    ctx.strokeStyle = item.color;
+                    ctx.lineWidth = item.width;
+                    ctx.beginPath();
+                    const points = item.stroke;
+                    for (let i = 0; i < points.length; i++) {
+                        const p = points[i];
+                        if (i === 0) {
+                            ctx.moveTo(p.x, p.y);
+                        } else {
+                            ctx.lineTo(p.x, p.y);
+                        }
+                    }
+                    ctx.stroke();
                 }
             }
 
@@ -357,6 +418,8 @@
                 colorPicker.disabled = false;
                 lineWidthSlider.disabled = false;
                 eraserToggle.disabled = false; // 消しゴムも有効に
+                undoBtn.disabled = false; //undoも有効に(オタニ追加)
+                redoBtn.disabled = false; //redoも有効に(オタニ追加)
                 drawingToolsContainer.style.display = 'flex'; // 描画ツール全体を表示
             }
 
@@ -435,18 +498,47 @@
                 if (msg.type === 'paint') {
                     const { x, y, control, color, width } = msg;
 
-                    if (color) ctx.strokeStyle = color;
-                    if (width) ctx.lineWidth = parseFloat(width);
+                    ctx.strokeStyle = color || "#000000";
+                    ctx.lineWidth = parseFloat(width) || 1;
 
                     if (control === 'mousedown') {
                         mousedown();
-                    } else if (control === 'mouseup') {
-                        mouseup();
+                        currentRemoteStroke = [{ x, y }];
                     } else if (control === 'mousemove') {
                         mousemove(x, y);
+                        currentRemoteStroke.push({ x, y });
+                    } else if (control === 'mouseup') {
+                        mouseup();
+                        drawingHistory.push({
+                            stroke: [...currentRemoteStroke],
+                            color: ctx.strokeStyle,
+                            width: ctx.lineWidth
+                        });
+                        undoneHistory = [];
+                        currentRemoteStroke = [];
                     } else if (control === 'mouseout') {
                         mouseout();
                     }
+                }
+
+                //undo処理(オタニ追加)
+                if (msg.type === 'undo') {
+                    if (drawingHistory.length > 0) {
+                        const lastStroke = drawingHistory.pop();
+                        undoneHistory.push(lastStroke);
+                        redraw();
+                    }
+                    return;
+                }
+
+                // Redo処理(オタニ追加)
+                if (msg.type === 'redo') {
+                    if (undoneHistory.length > 0) {
+                        const restored = undoneHistory.pop();
+                        drawingHistory.push(restored);
+                        redraw();
+                    }
+                    return;
                 }
 
                 //画像データを受信したらcanvasに表示(オガワ)
