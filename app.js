@@ -25,6 +25,12 @@ app.ws('/ws', (ws, req) => {
     const msg = JSON.parse(message)
     console.log('Received:', message)
 
+    //undo/redoを最初に処理(オタニ追加)
+    if (msg.type === "undo" || msg.type === "redo") {
+      broadcast(JSON.stringify(msg));
+      return;
+    }
+
     //参加したら(カワグチ)
     if (msg.type === 'join') {
       players.add(msg.id)
@@ -119,6 +125,15 @@ function notifyNextTurn() {
   connects.forEach((socket) => {
     if (socket.readyState === 1) socket.send(turnMsg)
   })
+}
+
+//broadcast関数を追加(オタニ追加)
+function broadcast(message) {
+  connects.forEach((socket) => {
+    if (socket.readyState === 1) {
+      socket.send(message);
+    }
+  });
 }
 
 //ひらがな　一文字を選ぶ関数(カワグチ)
