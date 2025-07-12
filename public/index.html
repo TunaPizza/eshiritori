@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat App</title>
+    <title>つなげ！　絵しりとり</title>
     <style>
         .chat {
             display: flex;
@@ -247,15 +247,10 @@
 
             // 現在の入室人数を表示をする関数(カワグチ)
             function updatePlayerCountDisplay() {
-                let countSpan = document.getElementById('playerCountSpan')
-
-                if (!countSpan) {
-                    countSpan = document.createElement('span')
-                    countSpan.id = 'playerCountSpan'
-                    countSpan.style.marginLeft = '10px'
-                    startButton.parentNode.insertBefore(countSpan, startButton.nextSibling)
+                const playerCountElement = document.getElementById('playerCount');
+                if (playerCountElement) {
+                    playerCountElement.textContent = players.size;
                 }
-                countSpan.textContent = `入室人数: ${players.size} 人`
             }
 
             // ゲーム開始ボタンが押されたら(カワグチ)
@@ -573,11 +568,30 @@
                     document.getElementById('turnSelect').parentElement.style.display = 'none'
                     document.getElementById('startButton').style.display = 'none'
 
+                    const firstCharEl = document.getElementById('firstChar');
+                    firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
+                    firstCharEl.style.display = 'inline';
+
+
+                    // 最初の文字をここで更新
+                    if (msg.firstChar) {
+                        const firstCharEl = document.getElementById('firstChar');
+                        firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
+                        firstCharEl.style.display = 'inline';
+                        console.log("最初の文字:", msg.firstChar);
+                    }
+
+                    // ターン順を表示または保持
+                    if (msg.turnOrder) {
+                        console.log("ターン順:", msg.turnOrder);
+
+                        alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
+                    }
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
                     setDrawingTurnUI();
                 }
 
-                //メッセージ送ったときの挙動の関数(カワグチ)
+                //メッセージ送ったときのテンプレート関数(カワグチ)
                 function appendMessage(id, text, myId) {
                     const messageList = document.querySelector('.messages')
                     const li = document.createElement('li')
