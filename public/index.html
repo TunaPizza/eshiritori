@@ -536,48 +536,7 @@
                 // 初期化時にキャンバスをクリア
                 ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
                 receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
-            }
-
-            //描画ターン、回答入力ターン、チャットモードそれぞれの処理(オガワ)
-            function setDrawingTurnUI() {
-                isDrawingTurn = true;
-                isAnsweringTurn = false;
-                enableDrawingTools(); // 描画ツールを有効化
-
-                chatForm.style.display = 'none';
-                sendPictureButton.style.display = 'block'
-                chatInput.placeholder = "絵を描いて「Send Picture」を押してください"
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
-
-            }
-
-            function setAnsweringTurnUI() {
-                isDrawingTurn = false;
-                isAnsweringTurn = true;
-                disableDrawingTools(); // 描画ツールを無効化
-
-                chatForm.style.display = 'flex';
-                sendPictureButton.style.display = 'none';
-                chatInput.placeholder = "何を描いたか”ひらがなで”入力してください";
-                chatInput.value = '';
-                chatInput.focus();
-            }
-
-            function setChatModeUI() {
-                isDrawingTurn = false;
-                isAnsweringTurn = false;
-
-                chatForm.style.display = 'flex';
-                sendPictureButton.style.display = 'none';
-                chatInput.placeholder = "チャットメッセージを入力";
-                chatInput.value = '';
-                chatInput.focus();
-
-                // 初期化時にキャンバスをクリア
-                ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-                receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
-            }
+            }           
 
             // 接続時に参加したことえお知らせる(カワグチ)
             ws.onopen = () => {
