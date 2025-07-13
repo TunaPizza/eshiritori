@@ -647,6 +647,27 @@
                     setDrawingTurnUI();
                 }
 
+                if (msg.type === 'turn_next') {
+                    const currentTurn = msg.currentTurn;
+                    const turnOrder = msg.turnOrder;
+                    const turnOrderDisplay = document.getElementById('turnOrderDisplay');
+                    turnOrderDisplay.innerHTML = 'ターン順: ' + turnOrder.map(id => {
+                        return id === currentTurn
+                            ? `<span style="color: red; font-weight: bold;">${id}</span>`
+                            : `<span>${id}</span>`;
+                    }).join(' → ');
+                    turnOrderDisplay.style.display = 'inline';
+
+                    // 必要に応じてUI切り替えもここで実行
+                    if (currentTurn === myId) {
+                        // 自分のターンなら描画ターンUIに切り替え
+                        setDrawingTurnUI();
+                    } else {
+                        // 他の人のターンならチャットモードなどにする
+                        setChatModeUI();
+                    }
+                }
+
                 //メッセージ送ったときのテンプレート関数(カワグチ)
                 function appendMessage(id, text, myId) {
                     const messageList = document.querySelector('.messages')
