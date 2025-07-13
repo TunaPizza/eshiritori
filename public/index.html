@@ -734,6 +734,9 @@
                         answers.push({ id: myId, text: text });
                         input.value = ''
                         input.focus()
+
+                        ws.send(JSON.stringify({ type: 'turn_end' }));
+
                     }
                     //回答送信後次の人の絵のターンへ
                     setDrawingTurnUI();
