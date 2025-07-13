@@ -67,6 +67,7 @@ app.ws('/ws', (ws, req) => {
       // ひらがな1文字をランダムに選ぶ(カワグチ)
       const firstChar = getRandomHiragana();
       const shuffledPlayers = Array.from(players).sort(() => Math.random() - 0.5);
+      turnOrder = shuffledPlayers;
       currentTurnIndex = 0;
 
       // 全接続にゲーム開始通知を送る(カワグチ)
@@ -79,6 +80,18 @@ app.ws('/ws', (ws, req) => {
           }));
         }
       });
+      notifyNextTurn();
+      return;
+    }
+
+    // 描画時間切れや回答時間切れのメッセージを受けたときにターン進行
+    if (msg.type === 'drawing_time_up' || msg.type === 'answering_time_up') {
+      // ターン進行
+      currentTurnIndex++;
+      if (currentTurnIndex >= turnOrder.length) {
+        currentTurnIndex = 0; // またはラウンド処理を入れる
+      }
+      notifyNextTurn();
       return;
     }
 
