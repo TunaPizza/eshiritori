@@ -168,7 +168,7 @@
         入室人数: <span id="playerCount">0</span>人
         <br />
         <!-- 誰のターンか(カワグチ) -->
-         
+
         <span id="turnOrderDisplay" style="display: inline;">ターン順: </span>
     </div>
 
@@ -649,7 +649,7 @@
                     setDrawingTurnUI();
                 }
 
-                if (msg.type === 'turn_next') {
+                if (msg.type === 'next_turn') {
                     const currentTurn = msg.currentTurn;
                     const turnOrder = msg.turnOrder;
                     const turnOrderDisplay = document.getElementById('turnOrderDisplay');
