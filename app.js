@@ -115,7 +115,6 @@ function notifyNextTurn() {
     type: 'next_turn',
     currentTurn: currentPlayer,
     turnOrder: turnOrder,
-    round: round
   })
 
   connects.forEach((socket) => {
