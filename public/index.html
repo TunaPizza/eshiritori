@@ -166,10 +166,11 @@
     <div id="gameStatus" style="font-size: 20px; font-weight: bold; margin: 10px 0;">
         <span id="firstChar" style="display: none;">最初の文字は </span>
         入室人数: <span id="playerCount">0</span>人
+        <br />
+        <!-- 誰のターンか(カワグチ) -->
+        <span id="turnOrderDisplay" style="display: none;">ターン順: </span>
     </div>
 
-    <!-- 誰のターンか(カワグチ) -->
-    <div id="turnDisplay" style="font-size: 18px; font-weight: bold; margin-bottom: 10px;"></div>
 
     <!-- 時間制限の表示(オガワ) -->
     <div id="timerDisplay" style="font-size: 24px; font-weight: bold; margin-bottom: 10px;"></div>
@@ -536,7 +537,7 @@
                 // 初期化時にキャンバスをクリア
                 ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
                 receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height);
-            }           
+            }
 
             // 接続時に参加したことえお知らせる(カワグチ)
             ws.onopen = () => {
@@ -633,18 +634,15 @@
                         const firstCharEl = document.getElementById('firstChar');
                         firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
                         firstCharEl.style.display = 'inline';
-                        console.log("最初の文字:", msg.firstChar);
                     }
 
                     // ターン順を表示または保持
                     if (msg.turnOrder) {
                         console.log("ターン順:", msg.turnOrder);
                         const turnOrderDisplay = document.getElementById('turnOrderDisplay');
+                        turnOrderDisplay.textContent = 'ターン順: ' + msg.turnOrder.join(' → ');
+                        turnOrderDisplay.style.display = 'inline';
                         alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
-                        if (turnOrderDisplay) {
-                            turnOrderDisplay.textContent = 'ターン順: ' + msg.turnOrder.join(' → ');
-                            turnOrderDisplay.style.display = 'inline';
-                        }
                     }
 
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
