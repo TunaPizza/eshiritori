@@ -614,7 +614,8 @@
 
                 //スタートボタンが押されたら(カワグチ)
                 if (msg.type === 'start') {
-                    console.log(msg.turnOrder)
+                    console.log('start message received:', msg);
+                    console.log('turnOrder:', msg.turnOrder);
                     //画面切り替え(チャット画面、ターン・ラウンド選択ボタンを消す)(カワグチ)
                     chatArea.style.display = 'block'
                     canvas.style.display = 'block'

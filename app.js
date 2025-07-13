@@ -65,6 +65,7 @@ app.ws('/ws', (ws, req) => {
 
     if (msg.type === 'start') {
       // ひらがな1文字をランダムに選ぶ(カワグチ)
+      console.log('Sending start message with turnOrder:', shuffledPlayers);
       const firstChar = getRandomHiragana();
       const shuffledPlayers = Array.from(players).sort(() => Math.random() - 0.5);
       turnOrder = shuffledPlayers;
