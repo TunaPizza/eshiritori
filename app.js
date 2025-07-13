@@ -13,7 +13,6 @@ let chatHistory = [];
 // グローバルでターン制御を保持(カワグチ)
 let turnOrder = [];
 let currentTurnIndex = 0;
-let round = 1;
 
 app.use(express.static('public'))
 
@@ -68,35 +67,18 @@ app.ws('/ws', (ws, req) => {
       // ひらがな1文字をランダムに選ぶ(カワグチ)
       const firstChar = getRandomHiragana();
       const shuffledPlayers = Array.from(players).sort(() => Math.random() - 0.5);
-      turnOrder = shuffledPlayers;
       currentTurnIndex = 0;
-
-      const startMsg = JSON.stringify({
-        type: 'start',
-        firstChar: firstChar,
-        turnOrder: turnOrder
-      });
 
       // 全接続にゲーム開始通知を送る(カワグチ)
       connects.forEach((socket) => {
         if (socket.readyState === 1) {
-          socket.send(startMsg);
+          socket.send(JSON.stringify({
+            type: 'start',
+            firstChar: firstChar,
+            turnOrder: shuffledPlayers,
+          }));
         }
       });
-      notifyNextTurn();
-      return;
-    }
-
-    // ターン終了を受け取る(カワグチ)
-    if (msg.type === 'end_turn') {
-      currentTurnIndex++;
-
-      if (currentTurnIndex >= turnOrder.length) {
-        currentTurnIndex = 0;
-        round++
-      }
-
-      notifyNextTurn();
       return;
     }
 
