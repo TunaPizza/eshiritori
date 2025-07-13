@@ -627,23 +627,21 @@
                     firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
                     firstCharEl.style.display = 'inline';
 
+                    const turnOrder = msg.turnOrder;
+                    const currentTurn = turnOrder[0];
+                    const turnOrderDisplay = document.getElementById('turnOrderDisplay');
+                    turnOrderDisplay.innerHTML = 'ターン順: ' + turnOrder.map(id => {
+                        return id === currentTurn
+                            ? `<span style="color: red; font-weight: bold;">${id}</span>`
+                            : `<span>${id}</span>`;
+                    }).join(' → ');
+                    turnOrderDisplay.style.display = 'inline';
 
-                    // 最初の文字をここで更新
-                    if (msg.firstChar) {
-                        console.log("最初の文字:", msg.firstChar);
-                        const firstCharEl = document.getElementById('firstChar');
-                        firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
-                        firstCharEl.style.display = 'inline';
-                    }
+                    // デバッグ用に表示
+                    console.log("最初の文字:", msg.firstChar);
+                    console.log("ターン順:", msg.turnOrder);
 
-                    // ターン順を表示または保持
-                    if (msg.turnOrder) {
-                        console.log("ターン順:", msg.turnOrder);
-                        const turnOrderDisplay = document.getElementById('turnOrderDisplay');
-                        turnOrderDisplay.textContent = 'ターン順: ' + msg.turnOrder.join(' → ');
-                        turnOrderDisplay.style.display = 'inline';
-                        alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
-                    }
+                    alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
 
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
                     setDrawingTurnUI();
