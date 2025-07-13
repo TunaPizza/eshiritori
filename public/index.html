@@ -575,6 +575,7 @@
 
                     // 最初の文字をここで更新
                     if (msg.firstChar) {
+                        console.log("最初の文字:", msg.firstChar);
                         const firstCharEl = document.getElementById('firstChar');
                         firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
                         firstCharEl.style.display = 'inline';
@@ -584,9 +585,14 @@
                     // ターン順を表示または保持
                     if (msg.turnOrder) {
                         console.log("ターン順:", msg.turnOrder);
-
+                        const turnOrderDisplay = document.getElementById('turnOrderDisplay');
                         alert(`最初の文字: ${msg.firstChar}\nターン順: ${msg.turnOrder.join(" → ")}`);
+                        if (turnOrderDisplay) {
+                            turnOrderDisplay.textContent = 'ターン順: ' + msg.turnOrder.join(' → ');
+                            turnOrderDisplay.style.display = 'inline';
+                        }
                     }
+
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
                     setDrawingTurnUI();
                 }
