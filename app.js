@@ -68,6 +68,7 @@ app.ws('/ws', (ws, req) => {
       // ひらがな1文字をランダムに選ぶ(カワグチ)
       const firstChar = getRandomHiragana();
       const shuffledPlayers = Array.from(players).sort(() => Math.random() - 0.5);
+      turnOrder = shuffledPlayers;
       currentTurnIndex = 0;
 
       const startMsg = JSON.stringify({
