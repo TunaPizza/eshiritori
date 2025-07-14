@@ -125,6 +125,16 @@ app.ws('/ws', (ws, req) => {
       console.log('紐付けられたユーザーIDのないクライアントが切断されました。');
     }
     broadcastPlayerCount();
+
+    const leaveMessage = {
+      type: 'leave', // 新しいタイプ 'leave'
+      id: disconnectedId // 誰が退室したか分かるようにIDを含める
+    };
+    wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(leaveMessage));
+      }
+    });
   })
 })
 
