@@ -274,14 +274,18 @@
             const gameControls = document.querySelector('.game-controls');
             const standbyMessageElement = document.getElementById('standbyMessage');
             const canvasesContainer = document.querySelector('.canvases-container');
+            const firstCharEl = document.getElementById('firstChar');
 
-
+            const turnOrderDisplay = document.getElementById('turnOrderDisplay');
+            const currentTurnInfo = document.getElementById('currentTurnInfo'); // 追加
 
             //チャット入力欄と、sendボタン、画像sendボタン(オガワ)
             const chatInput = document.getElementById('chatInput'); // chatInputのIDを追加
             const chatSubmitButton = document.getElementById('chatSubmitButton'); // chatSubmitButtonのIDを追加
             const sendPictureButton = document.getElementById('sendPictureButton'); // 新しいボタンを取得
             const drawingToolsContainer = document.querySelector('.drawing-tools');
+
+            const timerDisplay = document.getElementById('timerDisplay');
 
             //描画モードか、回答入力モードか(オガワ)
             let isDrawingTurn = false; //絵を描くターンかどうか
@@ -511,7 +515,7 @@
 
             function startTimer(duration, onTimeout) {
                 let timer = duration;
-                const timerDisplay = document.getElementById('timerDisplay');
+
                 clearInterval(countdownInterval);
 
                 countdownInterval = setInterval(() => {
@@ -781,14 +785,11 @@
                     //画面切り替え(チャット画面、ターン・ラウンド選択ボタンを消す)(カワグチ)
                     gameControls.classList.add('hidden'); // ゲーム設定は非表示
 
-                    const firstCharEl = document.getElementById('firstChar');
                     firstCharEl.textContent = '最初の文字: ' + msg.firstChar;
                     firstCharEl.classList.remove('hidden');
 
                     const turnOrder = msg.turnOrder;
                     const currentTurn = turnOrder[0];
-                    const turnOrderDisplay = document.getElementById('turnOrderDisplay');
-                    const currentTurnInfo = document.getElementById('currentTurnInfo'); // 追加
 
                     turnOrderDisplay.innerHTML = 'ターン順: ' + turnOrder.map(id => {
                         const isCurrent = id === currentTurn;
