@@ -296,8 +296,8 @@
                 // ゲーム開始前は、ゲームコントロールとチャットフォームのみ表示
                 gameControls.classList.remove('hidden');
                 chatForm.classList.remove('hidden');
-                canvasesContainer.classList.add('hidden');
-                drawingToolsContainer.classList.add('hidden');
+                canvasesContainer.classList.remove('hidden');
+                drawingToolsContainer.classList.remove('hidden');
                 sendPictureButton.classList.add('hidden');
                 standbyMessageElement.classList.add('hidden');
                 timerDisplay.classList.add('hidden');
@@ -635,7 +635,7 @@
                 isAnsweringTurn = false;
 
                 clearInterval(countdownInterval); // タイマー停止
-                timerDisplay.classList.add('hidden'); // タイマー非表示
+                timerDisplay.classList.remove('hidden'); // タイマー非表示
 
                 // UIの表示/非表示を切り替える
                 gameControls.classList.add('hidden'); // ゲーム設定は非表示
