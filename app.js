@@ -70,6 +70,7 @@ app.ws('/ws', (ws, req) => {
             type: 'start',
             firstChar: firstChar,
             turnOrder: shuffledPlayers,
+            remainingTime: 60,
           }));
         }
       });
