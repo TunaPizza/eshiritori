@@ -8,7 +8,7 @@ const port = process.env.PORT || 3001
 let connects = []
 //入室しているユーザー管理(重複を許さない)(カワグチ)
 let players = new Set()
-//過去のチャット(カワグチ)
+//チャットの履歴(カワグチ)
 let chatHistory = [];
 
 // ターン制御を保持(カワグチ)
@@ -29,7 +29,7 @@ app.ws('/ws', (ws, req) => {
     console.log('Received:', message)
 
     //undo/redo を最初に処理(お)
-    if (msg.type === "undo" || msg.type === "redo") {
+    if (msg.type === "undo" || msg.type === "redo" || msg.type === "paint") { //paint追加(カワグチ)
       broadcast(JSON.stringify(msg));
       return;
     }

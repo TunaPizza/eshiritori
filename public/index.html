@@ -8,10 +8,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>つなげ！　絵しりとり</title>
     <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 20px;
+        }
+
         .chat {
             display: flex;
             flex-direction: column;
             height: 80vh;
+            /* 追加 */
+            width: 400px;
+            /* チャットエリアの幅を固定 */
+            margin-bottom: 20px;
 
         }
 
@@ -21,6 +34,9 @@
             list-style: none;
             padding: 0;
             margin: 0;
+            /* 追加 */
+            border: 1px solid #ccc;
+            padding: 10px;
         }
 
         /* 自分のメッセージは右寄せ(カワグチ) */
@@ -54,6 +70,8 @@
 
         .form {
             display: flex;
+            /* 追加 */
+            margin-top: 10px;
         }
 
         .input {
@@ -148,6 +166,18 @@
         /* UIの表示/非表示制御(カワグチ) */
         .hidden {
             display: none !important;
+        }
+
+        #standbyMessage {
+            font-size: 2em;
+            text-align: center;
+            padding: 50px;
+            border: 2px solid #ddd;
+            background-color: #f0f0f0;
+            margin: 50px auto;
+            width: 80%;
+            box-sizing: border-box;
+            /* paddingを含めて幅を計算 */
         }
     </style>
 </head>
