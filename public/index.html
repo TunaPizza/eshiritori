@@ -21,7 +21,6 @@
             display: flex;
             flex-direction: column;
             height: 80vh;
-            width: 800px;
         }
 
         .messages {
@@ -644,6 +643,7 @@
                 isDrawingTurn = false;
                 isAnsweringTurn = false;
 
+                //clearInterval(countdownInterval); // タイマー停止
                 timerDisplay.classList.remove('hidden'); // タイマー表示
 
                 // UIの表示/非表示を切り替える
@@ -838,19 +838,9 @@
                         // 自分のターンなら描画ターンUIに切り替え
                         setDrawingTurnUI();
                     } else {
-                        setStandbyUI(currentTurn, '描画'); // 待機UIに切り替わる
-                        // ★ここに timerDisplay.textContent と startTimer() の呼び出しが必要です★
-                        if (msg.remainingTime !== undefined && msg.remainingTime !== null) {
-                            // タイマーの初期表示をすぐに更新
-                            timerDisplay.textContent = formatTime(msg.remainingTime);
-                            startTimer(msg.remainingTime, () => {
-                                console.log("待機中のタイマーが時間切れになりました (ターン移行時)。");
-                            });
-                        } else {
-                            console.warn("[クライアント] 'next_turn'メッセージに remainingTime が含まれていません。待機中のタイマーが開始できません。");
-                        }
+                        // 他の人のターンならチャットモードなどにする
+                        setStandbyUI(currentTurn, '描画');
                     }
-                    return;
                 }
 
                 if (msg.type === 'chat') {
