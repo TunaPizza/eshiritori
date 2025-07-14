@@ -204,10 +204,10 @@
     <!-- ルームの状況(カワグチ) -->
     <div id="gameStatus" style="font-size: 20px; font-weight: bold; margin: 10px 0;">
         <span id="firstChar" style="display: none;">最初の文字は </span>
-        <span id="playerCountDisplay">0</span>
+        <span id="playerCountDisplay"></span>
         <br />
         <!-- 誰のターンか(カワグチ) -->
-        <span id="currentTurnInfo"></span><span id="turnOrderDisplay" style="display: inline;">ターン順: </span>
+        <span id="currentTurnInfo"></span><span id="turnOrderDisplay" style="display: inline;"></span>
     </div>
 
     <!-- 時間制限の表示(オガワ) -->
@@ -712,7 +712,6 @@
             //受信側に color, width, eraser　を追加(オタニ追加)
             ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
-                console.log('[クライアント] 受信メッセージ:', msg);
                 if (msg.type === 'paint') {
                     if (isDrawingTurn) {//自分が描画するときのみ(カワグチ追加)
                         const { x, y, control, color, width } = msg;
@@ -893,7 +892,6 @@
                 }
 
                 if (msg.type === 'leave') {
-                    console.log('[クライアント] 退室メッセージを受信:', msg.id);
                     appendMessage('システム', `${msg.id}が退室しました`, myId);
                     return;
                 }
