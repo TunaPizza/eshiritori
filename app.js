@@ -24,7 +24,7 @@ app.use(express.static('public'))
 
 app.ws('/ws', (ws, req) => {
   connects.push(ws)
-  broadcastPlayerCount()
+
 
   ws.on('message', (message) => {
     //メッセージJSONに変換(カワグチ)
@@ -124,6 +124,7 @@ app.ws('/ws', (ws, req) => {
     } else {
       console.log('紐付けられたユーザーIDのないクライアントが切断されました。');
     }
+    broadcastPlayerCount();
   })
 })
 
