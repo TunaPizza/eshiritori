@@ -274,6 +274,8 @@
             const turnOrderDisplay = document.getElementById('turnOrderDisplay');
             const currentTurnInfo = document.getElementById('currentTurnInfo'); // 追加
 
+            const playerCountDisplay = document.getElementById('playerCountDisplay');
+
             //チャット入力欄と、sendボタン、画像sendボタン(オガワ)
             const chatInput = document.getElementById('chatInput'); // chatInputのIDを追加
             const chatSubmitButton = document.getElementById('chatSubmitButton'); // chatSubmitButtonのIDを追加
@@ -303,14 +305,6 @@
             }
 
             initializeUI(); // ページ読み込み時に初期化
-
-            // 現在の入室人数を表示をする関数(カワグチ)
-            function updatePlayerCountDisplay() {
-                const playerCountElement = document.getElementById('playerCount');
-                if (playerCountElement) {
-                    playerCountElement.textContent = players.size;
-                }
-            }
 
             // ゲーム開始ボタンが押されたら(カワグチ)
             startButton.onclick = () => {
@@ -780,13 +774,41 @@
                     return
                 }
 
-                //プレイヤー情報が送られてきたら(カワグチ)
-                if (msg.type === 'players') {
-                    players = new Set(msg.players)
-                    //入室人数の更新
-                    updatePlayerCountDisplay()
-                    return
+                // サーバーから初期情報が送られてきた場合 (type: 'init')
+                if (msg.type === 'init') {
+                    // クライアント側のplayers Setをサーバーの最新状態に同期
+                    players = new Set(msg.players);
+                    console.log('[クライアント] initを受信。現在のプレイヤー数:', players.size);
+
+                    // 入室人数の表示を更新
+                    if (playerCountDisplay) { // 'playerCountDisplay' が存在するなら
+                        playerCountDisplay.textContent = `入室人数: ${players.size}人`;
+                    } else {
+                        console.error('[クライアント] playerCountDisplay要素が見つかりません。HTMLを確認してください。');
+                    }
+
+                    // チャット履歴の表示（もしあれば）
+                    if (msg.chatHistory && msg.chatHistory.length > 0) {
+                        msg.chatHistory.forEach(chatMsg => {
+                            appendMessage(chatMsg.id, chatMsg.text, myId);
+                        });
+                    }
+                    return;
                 }
+
+                // サーバーからプレイヤー人数更新が送られてきた場合 (type: 'player_count_update')
+                if (msg.type === 'player_count_update') {
+                    console.log(`[クライアント] player_count_updateを受信: ${msg.count}人`);
+                    if (playerCountDisplay) {
+                        playerCountDisplay.textContent = `入室人数: ${msg.count}人`;
+                    } else {
+                        console.error('[クライアント] playerCountDisplay要素が見つかりません。HTMLを確認してください。');
+                    }
+                    return;
+                }
+
+
+              
 
                 //スタートボタンが押されたら(カワグチ)
                 if (msg.type === 'start') {
@@ -864,7 +886,7 @@
                     // 入室したユーザーをセットに追加(カワグチ)
                     players.add(msg.id)
                     //入室人数の更新(カワグチ)
-                    updatePlayerCountDisplay()
+                   
                     appendMessage('システム', `${msg.id}が入室しました`, myId); // 回答もチャットに表示
                     return
                 }
