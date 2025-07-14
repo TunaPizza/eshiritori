@@ -782,7 +782,7 @@
 
                     // 入室人数の表示を更新
                     if (playerCountDisplay) { // 'playerCountDisplay' が存在するなら
-                        playerCountDisplay.textContent = `入室人数: ${players.size}人`;
+                        playerCountDisplay.textContent = players.size;
                     } else {
                         console.error('[クライアント] playerCountDisplay要素が見つかりません。HTMLを確認してください。');
                     }
