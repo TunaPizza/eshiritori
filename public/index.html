@@ -441,16 +441,16 @@
             }
 
             //draw関数をundo/redoのために変更(オタニ追加)
-            // function draw(x, y, dragging) {
-            //     if (dragging) {
-            //         ctx.lineTo(x, y);
-            //         ctx.stroke();
-            //         currentStroke.push({ x, y });
-            //     } else {
-            //         ctx.moveTo(x, y);
-            //         currentStroke.push({ x, y });
-            //     }
-            // }
+            function draw(x, y, dragging) {
+                if (dragging) {
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    currentStroke.push({ x, y });
+                } else {
+                    ctx.moveTo(x, y);
+                    currentStroke.push({ x, y });
+                }
+            }
 
             //canvasを再描画する際に必要(オタニ追加)
             function redraw() {
@@ -856,7 +856,7 @@
                     players.add(msg.id)
                     //入室人数の更新(カワグチ)
                     updatePlayerCountDisplay()
-                    appendMessage('システム', `${id}が入室しました`, myId); // 回答もチャットに表示
+                    appendMessage('システム', `${msg.id}が入室しました`, myId); // 回答もチャットに表示
                     return
                 }
             }
