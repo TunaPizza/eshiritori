@@ -572,7 +572,15 @@
 
                 startTimer(60, () => {
                     alert("描画ターン時間切れ！");
+                    disableDrawingTools();
+                    currentDrawingData = canvas.toDataURL('image/png');
+                    drawnImages.push(currentDrawingData);
+                    console.log("描画時間切れにより保存された画像:" + drawnImages);
+
+                    ws.send(JSON.stringify({ type: 'image_sended', imageData: currentDrawingData }));
                     ws.send(JSON.stringify({ type: 'drawing_time_up' }));
+
+                    setAnsweringTurnUI();
                 });
             }
 
@@ -621,7 +629,13 @@
 
                 startTimer(30, () => {
                     alert("回答ターン時間切れ！");
+                    disableChatInput();
+
+                    const text = chatInput.value.trim(); // 現在の入力値を取得（空欄の場合も考慮）
+                    ws.send(JSON.stringify({ id: myId, text: text, type: 'answer' }));
+                    console.log("回答時間切れにより送信された回答:", { id: myId, text: text });
                     ws.send(JSON.stringify({ type: 'answering_time_up' }));
+                    ws.send(JSON.stringify({ type: 'turn_end' }));
                 });
             }
             // 自分の番じゃない待機UI(カワグチ)
@@ -629,7 +643,6 @@
                 isDrawingTurn = false;
                 isAnsweringTurn = false;
 
-                clearInterval(countdownInterval); // タイマー停止
                 timerDisplay.classList.remove('hidden'); // タイマー非表示
 
                 // UIの表示/非表示を切り替える
