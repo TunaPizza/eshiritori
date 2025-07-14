@@ -44,25 +44,21 @@ app.ws('/ws', (ws, req) => {
 
       //ターン終了なら
       if (msg.type === 'turn_end') {
-        console.log('ターン終了通知を受信');
-
-        // ターンを進める
+        console.log('サーバーで turn_end を受信');
         currentTurnIndex = (currentTurnIndex + 1) % turnOrder.length;
         const currentTurn = turnOrder[currentTurnIndex];
 
-        // 全員に通知
-        const message = {
-          type: 'next_turn',
-          currentTurn: currentTurn,
-          turnOrder: turnOrder
-        };
-
         connects.forEach((socket) => {
           if (socket.readyState === 1) {
-            socket.send(JSON.stringify(message));
+            socket.send(JSON.stringify({
+              type: 'next_turn',
+              currentTurn,
+              turnOrder,
+            }));
           }
         });
       }
+      
       // 全クライアントに現在の参加者リストを送信(カワグチ)
       const playersMsg = JSON.stringify({
         type: 'players',

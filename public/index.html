@@ -735,6 +735,7 @@
                         input.value = ''
                         input.focus()
 
+                        console.log('sending turn_end');
                         ws.send(JSON.stringify({ type: 'turn_end' }));
 
                     }
