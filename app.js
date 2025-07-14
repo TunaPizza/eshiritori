@@ -130,11 +130,7 @@ app.ws('/ws', (ws, req) => {
       type: 'leave', // 新しいタイプ 'leave'
       id: userId // 誰が退室したか分かるようにIDを含める
     };
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(leaveMessage));
-      }
-    });
+    broadcast(JSON.stringify(leaveMessage));
   })
 })
 
