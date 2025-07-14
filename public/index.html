@@ -204,7 +204,7 @@
     <!-- ルームの状況(カワグチ) -->
     <div id="gameStatus" style="font-size: 20px; font-weight: bold; margin: 10px 0;">
         <span id="firstChar" style="display: none;">最初の文字は </span>
-        入室人数: <span id="playerCountDisplay">0</span>人
+        <span id="playerCountDisplay">0</span>
         <br />
         <!-- 誰のターンか(カワグチ) -->
         <span id="currentTurnInfo"></span><span id="turnOrderDisplay" style="display: inline;">ターン順: </span>
@@ -783,7 +783,7 @@
 
                     // 入室人数の表示を更新
                     if (playerCountDisplay) { // 'playerCountDisplay' が存在するなら
-                        playerCountDisplay.textContent = players.size;
+                        playerCountDisplay.textContent = `入室人数: ${players.size}人`;
                     } else {
                         console.error('[クライアント] playerCountDisplay要素が見つかりません。HTMLを確認してください。');
                     }
