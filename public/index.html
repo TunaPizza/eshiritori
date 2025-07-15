@@ -428,31 +428,40 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                const size = parseInt(lineWidthSlider.value) + 4; // 太さに応じて調整
+                const size = parseInt(lineWidthSlider.value) + 4;
                 const half = size / 2;
 
-                cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height); // 前のガイドを消す
-                let drawColor = eraserMode ? '#ffffff' : colorPicker.value;
-                let guideColor = drawColor;
+                cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
 
+                // 描画色を取得（消しゴム時は白）
+                const colorValue = colorPicker?.value || '#000000';
+                const drawColor = eraserMode ? '#ffffff' : colorValue;
+
+                // 塗りつぶし色
+                let fillColor = drawColor;
                 if (/^#[0-9A-F]{6}$/i.test(drawColor)) {
                     const r = parseInt(drawColor.substr(1, 2), 16);
                     const g = parseInt(drawColor.substr(3, 2), 16);
                     const b = parseInt(drawColor.substr(5, 2), 16);
-                    guideColor = `rgba(${r}, ${g}, ${b}, 1.0)`; // 半透明に
+                    fillColor = `rgba(${r}, ${g}, ${b}, 1.0)`; // 塗り色
                 }
 
-                // 塗りつぶし
-                cursorCtx.fillStyle = guideColor;
+                // 枠線の色（消しゴム時は黒、それ以外は同じ色）
+                const strokeColor = eraserMode ? 'glay' : fillColor;
+
+                // 描画
+                cursorCtx.fillStyle = fillColor;
                 cursorCtx.fillRect(x - half, y - half, size, size);
 
-                cursorCtx.strokeStyle = guideColor;
+                cursorCtx.strokeStyle = strokeColor;
                 cursorCtx.lineWidth = 1;
                 cursorCtx.strokeRect(x - half, y - half, size, size);
+
                 if (drawing) {
-                    sendDrawingEvent(e.offsetX, e.offsetY, 'mousemove')
+                    sendDrawingEvent(e.offsetX, e.offsetY, 'mousemove');
                 }
-            })
+            });
+
             function mousemove(x, y) {
                 if (drawing) {
                     draw(x, y, true)
