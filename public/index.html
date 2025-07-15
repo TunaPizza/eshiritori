@@ -144,6 +144,8 @@
             /* キャンバスを中央寄せ */
             align-items: flex-start;
             /* 上端を揃える */
+            position: relative;
+            /* 子要素の絶対配置のため(オタニ追加) */
         }
 
         .canvases-container canvas {
@@ -159,6 +161,14 @@
         #canvas {
             border: solid 1px black;
             /* 描画用キャンバスの枠線 */
+        }
+
+        /* カーソルガイド用キャンバスを重ねて表示(オタニ追加) */
+        #cursorCanvas {
+            position: absolute;
+            pointer-events: none;
+            top: 0;
+            left: 0;
         }
 
         /* UIの表示/非表示制御(カワグチ) */
@@ -223,6 +233,9 @@
         <div class="canvases-container">
             <canvas id="receivedCanvas" width="600" height="600"></canvas>
             <canvas id="canvas" width="600" height="600"></canvas>
+            <!-- コンソールガイド用キャンバス(オタニ追加) -->>
+            <canvas id="cursorCanvas" width="600" height="600"
+                style="position: absolute; pointer-events: none;"></canvas>
         </div>
 
         <div class="drawing-tools">
@@ -339,6 +352,18 @@
             const canvas = document.getElementById('canvas')
             const ctx = canvas.getContext('2d')
 
+            //カーソルガイドのコンテキストを取得(オタニ追加)
+            const cursorCanvas = document.getElementById('cursorCanvas');
+            const cursorCtx = cursorCanvas.getContext('2d');
+
+            // 右の #canvas を基準に座標調整(オタニ追加)
+            function updateCursorCanvasPosition() {
+                const canvasRect = canvas.getBoundingClientRect();
+                cursorCanvas.style.left = canvas.offsetLeft + 'px';
+                cursorCanvas.style.top = canvas.offsetTop + 'px';
+            }
+            updateCursorCanvasPosition();
+
             //ColorPickerの色、線の太さ、消しゴムをcanvasに反映させる(オタニ追加)
             const colorPicker = document.getElementById('colorPicker');
             const lineWidthSlider = document.getElementById('lineWidthSlider');
@@ -395,7 +420,35 @@
                 ctx.beginPath();
             }
 
+            //マウスが動いた時にカーソルガイドを描画(オタニ追加)
             canvas.addEventListener('mousemove', (e) => {
+                if (!gameStarted || !isDrawingTurn) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const size = parseInt(lineWidthSlider.value) + 4; // 太さに応じて調整
+                const half = size / 2;
+
+                cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height); // 前のガイドを消す
+                let drawColor = eraserMode ? '#ffffff' : colorPicker.value;
+                let guideColor = drawColor;
+
+                if (/^#[0-9A-F]{6}$/i.test(drawColor)) {
+                    const r = parseInt(drawColor.substr(1, 2), 16);
+                    const g = parseInt(drawColor.substr(3, 2), 16);
+                    const b = parseInt(drawColor.substr(5, 2), 16);
+                    guideColor = `rgba(${r}, ${g}, ${b}, 1.0)`; // 半透明に
+                }
+
+                // 塗りつぶし
+                cursorCtx.fillStyle = guideColor;
+                cursorCtx.fillRect(x - half, y - half, size, size);
+
+                cursorCtx.strokeStyle = guideColor;
+                cursorCtx.lineWidth = 1;
+                cursorCtx.strokeRect(x - half, y - half, size, size);
                 if (drawing) {
                     sendDrawingEvent(e.offsetX, e.offsetY, 'mousemove')
                 }
@@ -405,6 +458,10 @@
                     draw(x, y, true)
                 }
             }
+
+            canvas.addEventListener('mouseout', () => {
+                cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+            });
 
             canvas.addEventListener('mouseup', (e) => {
                 sendDrawingEvent(e.offsetX, e.offsetY, 'mouseup')
