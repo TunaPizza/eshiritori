@@ -307,35 +307,6 @@
 
             // --- 初期設定(カワグチ) ---
             function initializeUI() {
-                gameStarted = false;
-                isDrawingTurn = false;
-                isAnsweringTurn = false;
-
-                answers = [];
-                drawnImages = [];
-                currentDrawingData = null;
-                currentRemoteStroke = [];
-                drawingHistory = [];
-                undoneHistory = [];
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // 自分のキャンバスをクリア
-                receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height); // 受信キャンバスもクリア
-
-                canvas.style.pointerEvents = 'none'; // キャンバスの操作を無効化
-                colorPicker.value = '#000000'; // 色を初期値に戻す (黒)
-                thicknessSlider.value = 5; // 太さを初期値に戻す
-                thicknessDisplay.textContent = 5; // 太さ表示を初期値に戻す
-                eraserMode = false; // 消しゴムモードをオフに
-                eraserToggle.textContent = "消しゴム OFF"; // ボタン表示をリセット
-                ctx.strokeStyle = colorPicker.value; // 色を初期値に戻す
-                ctx.lineWidth = thicknessSlider.value; // 太さを初期値に戻す
-
-                if (countdownInterval) { // タイマーがセットされていれば停止
-                    clearInterval(countdownInterval);
-                    countdownInterval = null;
-                }
-                timeRemaining = 0; // 残り時間もリセット
-
                 // ゲーム開始前は、ゲームコントロールとチャットフォームのみ表示
                 gameControls.classList.remove('hidden');
                 chatForm.classList.remove('hidden');
@@ -348,7 +319,6 @@
                 turnOrderDisplay.classList.remove('hidden'); // プレイヤー数とターン順は常に表示
                 currentTurnInfo.classList.add('hidden'); // ゲーム開始前は非表示
                 enableChatInput(); // ゲーム開始前はチャット入力無効
-
             }
 
             initializeUI(); // ページ読み込み時に初期化
@@ -364,7 +334,7 @@
                 )
 
                 if (confirmed) {
-                    ws.send(JSON.stringify({ type: 'start', rounds: parseInt(round), turns: parseInt(turn) }))
+                    ws.send(JSON.stringify({ type: 'start', rounds: parseInt(round), turns: parseInt(turn)  }))
 
                     gameStarted = true; //ゲーム開始状態にする(オガワ)
                     //ゲーム開始時は描画ターン(オガワ)
@@ -973,7 +943,7 @@
                     const restartButton = document.createElement('button');
                     restartButton.textContent = 'もう一度プレイする';
                     restartButton.onclick = () => {
-                        initializeUI(); // 初期状態に戻す
+                        initializeUI();// ページをリロードして初期状態に戻す
                     };
                     standbyMessageElement.parentNode.insertBefore(restartButton, standbyMessageElement.nextSibling);
 
