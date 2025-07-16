@@ -307,76 +307,48 @@
 
             // --- 初期設定(カワグチ) ---
             function initializeUI() {
-                // --- 1. グローバルなゲーム状態変数のリセット ---
-                // あなたのコードで定義されているであろう変数たちをここに含めます
-                // もしこれらの変数がまだ定義されていなければ、ファイルの先頭などで定義してください
-                // 例: let gameStarted = false; など
                 gameStarted = false;
-                currentRound = 1;         // 現在のラウンド数
-                currentTurnNumber = 1;    // 現在のターン数
-                currentPhase = 'standby'; // ゲームフェーズを「待機」状態にリセット
-                isDrawingTurn = false;    // 描画ターンフラグをリセット
-                isAnsweringTurn = false;  // 回答ターンフラグをリセット
-                // 描画データや解答データなどがあればここもクリア
-                // let currentDrawingData = ''; // 描画中のデータがあれば
-                // currentDrawingData = '';
-                chatMessages = []; // チャット履歴を空にする
-                // savedAnswers = []; // もし回答をクライアント側で保持していればクリア
+                isDrawingTurn = false;
+                isAnsweringTurn = false;
 
-                // --- 2. キャンバスと描画ツールのリセット ---
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // キャンバスをクリア
+                answers = [];
+                drawnImages = [];
+                currentDrawingData = null;
+                currentRemoteStroke = [];
+                drawingHistory = [];
+                undoneHistory = [];
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // 自分のキャンバスをクリア
+                receivedCtx.clearRect(0, 0, receivedCanvas.width, receivedCanvas.height); // 受信キャンバスもクリア
+
                 canvas.style.pointerEvents = 'none'; // キャンバスの操作を無効化
                 colorPicker.value = '#000000'; // 色を初期値に戻す (黒)
                 thicknessSlider.value = 5; // 太さを初期値に戻す
                 thicknessDisplay.textContent = 5; // 太さ表示を初期値に戻す
+                eraserMode = false; // 消しゴムモードをオフに
+                eraserToggle.textContent = "消しゴム OFF"; // ボタン表示をリセット
+                ctx.strokeStyle = colorPicker.value; // 色を初期値に戻す
+                ctx.lineWidth = thicknessSlider.value; // 太さを初期値に戻す
 
-                // --- 3. タイマーの停止とリセット ---
-                if (timerInterval) { // タイマーがセットされていれば停止
-                    clearInterval(timerInterval);
-                    timerInterval = null;
+                if (countdownInterval) { // タイマーがセットされていれば停止
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
                 }
-                timeRemaining = 0; // 残り時間もリセット (もし使っていれば)
+                timeRemaining = 0; // 残り時間もリセット
 
-                // --- 4. UI要素の表示/非表示の切り替え（あなたの既存コード＋α） ---
-                // 基本的に、ゲーム開始前のUIのみ表示し、ゲーム中のUIは隠す
-                gameControls.classList.remove('hidden'); // ゲーム開始ボタンなど
-                chatForm.classList.remove('hidden');     // チャット入力フォーム
-                canvasesContainer.classList.remove('hidden'); // キャンバスは表示しておくが、操作は無効
-                drawingToolsContainer.classList.remove('hidden'); // 描画ツールは表示しておく
-
-                // ゲーム開始後に表示される要素や、描画/回答ターン特有の要素は隠す
+                // ゲーム開始前は、ゲームコントロールとチャットフォームのみ表示
+                gameControls.classList.remove('hidden');
+                chatForm.classList.remove('hidden');
+                canvasesContainer.classList.remove('hidden');
+                drawingToolsContainer.classList.remove('hidden');
                 sendPictureButton.classList.add('hidden');
                 standbyMessageElement.classList.add('hidden');
                 timerDisplay.classList.add('hidden');
                 firstCharEl.classList.add('hidden');
-                currentTurnInfo.classList.add('hidden');
-                gameEndMessage.classList.add('hidden'); // ゲーム終了メッセージ
-                finalScoresContainer.innerHTML = ''; // 最終スコア表示をクリア
+                turnOrderDisplay.classList.remove('hidden'); // プレイヤー数とターン順は常に表示
+                currentTurnInfo.classList.add('hidden'); // ゲーム開始前は非表示
+                enableChatInput(); // ゲーム開始前はチャット入力無効
 
-                // チャット表示エリアのクリア
-                chatMessagesContainer.innerHTML = '';
-                chatInput.value = ''; // チャット入力欄もクリア
-
-                // プレイヤーリストをクリア (サーバーから最新のリストが送られてくるため)
-                playersList.innerHTML = '';
-
-                // スピンボタンの値を初期値に戻す (任意)
-                document.getElementById('roundSelect').value = '3'; // デフォルト値
-                document.getElementById('turnSelect').value = '2';  // デフォルト値
-
-                // プレイヤー人数とターン順は、ゲーム開始前はまだ確定していないため、非表示にしても良い
-                // もし、プレイヤー入室段階から表示したいなら hidden を remove に変更
-                turnOrderDisplay.classList.add('hidden'); // 初期状態では非表示
-                roundInfo.classList.add('hidden');        // 初期状態では非表示
-
-                // 入室UIの再表示
-                joinUI.classList.remove('hidden'); // 参加ID入力など
-
-                // チャット入力は有効にする（入室時のやり取りのため）
-                enableChatInput(); // あなたのコードで定義されたチャット入力有効化関数
-                // disableChatInput(); // もし特定のタイミングで無効にしたい場合
-
-                console.log("クライアントUIとゲーム状態を初期化しました。");
             }
 
             initializeUI(); // ページ読み込み時に初期化
