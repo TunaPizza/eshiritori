@@ -304,6 +304,10 @@
             let isDrawingTurn = false; //絵を描くターンかどうか
             let isAnsweringTurn = false; //回答入力ターンかどうか
 
+            //消しゴムモード(オタニ追加)
+            let drawing = false;
+            let eraserMode = false;
+
             //過去に書いたものを入れる配列(オタニ追加)
             let drawingHistory = [];
             let undoneHistory = [];
@@ -418,9 +422,6 @@
             lineWidthSlider.addEventListener('input', () => {
                 ctx.lineWidth = lineWidthSlider.value;
             });
-
-            let drawing = false;
-            let eraserMode = false;
 
             //トグル(オタニ追加)
             eraserToggle.addEventListener('click', () => {
