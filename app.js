@@ -28,6 +28,8 @@ let gameConfig = { // ゲーム設定(オガワ)
   totalTurnsElapsed: 0 // 経過した総ターン数(オガワ)
 };
 
+let gameRecord = []; // [{ imageData: '...', answer: '...', turnPlayerId: '...' }] の形式で保存(オガワ)
+
 app.use(express.static('public'))
 
 app.ws('/ws', (ws, req) => {
@@ -152,6 +154,22 @@ app.ws('/ws', (ws, req) => {
         if (chatHistory.length > 50) {
           chatHistory.shift();
         }
+      } else if (msg.type === 'answer') { // 回答も gameRecord に紐付けて保存
+        // 最新の gameRecord エントリ（直前の描画）に回答を紐付ける
+        if (gameRecord.length > 0) {
+          const lastEntry = gameRecord[gameRecord.length - 1];
+          // 既に回答がある場合は上書きせず、複数回答を受け付ける場合は配列にするなど調整
+          if (!lastEntry.answer) { // 最初の回答のみを保存する例
+            lastEntry.answer = msg.text;
+            lastEntry.answerPlayerId = msg.id; // 回答したプレイヤーのID
+            console.log("回答が gameRecord に保存されました:", lastEntry);
+          } else {
+            console.log("このターンにはすでに回答が保存されています。");
+            // 複数回答を許可する場合はここにロジックを追加
+          }
+        } else {
+          console.warn("gameRecord が空のため回答を保存できませんでした。");
+        }
       }
       return;
     }
@@ -159,6 +177,14 @@ app.ws('/ws', (ws, req) => {
     //画像を送ったとき(カワグチ)
     if (msg.type === 'image_sended') {
       console.log('サーバーで image_sended を受信');
+      // 描かれた画像を保存(オガワ)
+      // 誰の描画か、その時のターン情報なども一緒に保存する
+      gameRecord.push({
+        imageData: msg.imageData,
+        turnPlayerId: wsUserMap.get(ws), // 描いたプレイヤーのID
+        // initialChar: '現在のターンの最初の文字', // 必要であれば追加
+        // round: round // 何ラウンド目の描画か
+      });
       // 画像データを送ってきた本人以外にブロードキャスト
       connects.forEach((socket) => {
         if (socket.readyState === 1 && socket !== ws) { // 送信者自身には送らない
@@ -225,6 +251,7 @@ function resetGameState() {
     turnsPerRound: 0,
     totalTurnsElapsed: 0
   };
+  gameRecord = []; // ゲームリセット時に履歴もクリア
 }
 
 
@@ -247,7 +274,9 @@ function advanceTurn() {
     // ゲーム終了条件の判定
     if (gameConfig.totalTurnsElapsed >= gameConfig.turnsPerRound * players.size) {
       console.log('[サーバー] 設定された総ターン数に達しました。ゲームを終了します。');
-      broadcast(JSON.stringify({ type: 'game_end', message: 'ゲーム終了！設定されたターン数に達しました。' }));
+      broadcast(JSON.stringify({
+        type: 'game_end', message: 'ゲーム終了！設定されたターン数に達しました。', gameRecord: gameRecord
+      }));
       resetGameState(); // ゲーム終了後に状態をリセット
       return; // ゲーム終了のため、これ以上ターンを進めない
     }
