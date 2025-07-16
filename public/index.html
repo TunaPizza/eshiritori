@@ -1001,7 +1001,7 @@
                     restartButton.style.cursor = 'pointer';
                     restartButton.style.borderRadius = '5px';
                     restartButton.onclick = () => {
-                        location.reload(); // ページをリロードして初期状態に戻す
+                        initializeUI();  // 初期状態に戻す
                     };
                     resultsContainer.appendChild(restartButton);
 
